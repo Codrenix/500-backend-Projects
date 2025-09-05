@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Backend Project Catalog – 10×50</title>
+  <style>
+    :root{
+      --bg:#0f1220;
+      --card:#161a2f;
+      --soft:#1e2342;
+      --text:#e6e8f5;
+      --muted:#aab0d6;
+      --accent:#6aa5ff;
+      --accent-2:#9bffd6;
+      --ring:#2a315f;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", Helvetica, Arial;
+      color:var(--text);
+      background:linear-gradient(180deg, #0c0f1b 0%, #0f1220 60%, #0c0f1b 100%);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    .app{display:grid; grid-template-columns: 300px 1fr; min-height:100vh}
+    .sidebar{position:sticky; top:0; align-self:start; height:100vh; overflow:auto; background:linear-gradient(180deg, var(--card), var(--soft)); border-right:1px solid var(--ring); padding-bottom:28px}
+    .brand{display:flex; align-items:center; gap:.7rem; padding:18px 18px; border-bottom:1px solid var(--ring)}
+    .logo{width:80px; height:80px; border-radius:12px; background: radial-gradient(100% 100% at 30% 20%, var(--accent), #3b63ff 70%, #2b2bff); box-shadow: inset 0 0 20px rgba(255,255,255,.15), var(--shadow)}
+    h1{font-size:clamp(18px,2.2vw,26px); margin:0}
+    .controls{padding:12px 16px; border-bottom:1px solid var(--ring); display:grid; gap:10px}
+    .search{display:flex; gap:8px}
+    input[type="search"], select{
+      width:100%; padding:10px 12px; border-radius:12px; border:1px solid var(--ring); background:#0b0f1e; color:var(--text); outline:none;
+    }
+    input[type="search"]:focus, select:focus{border-color:var(--accent)}
+    .btn{border:1px solid var(--ring); background:#0b0f1e; color:var(--text); padding:10px 12px; border-radius:12px; cursor:pointer}
+    .btn:hover{border-color:var(--accent); color:#fff}
+    .catlist{display:grid; gap:8px; padding:14px}
+    .catbtn{display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px; border-radius:12px; border:1px solid var(--ring); background:linear-gradient(180deg, #0e1326, #0b0f1e); color:var(--text); cursor:pointer; text-align:left; transition:transform .12s ease}
+    .catbtn:hover{transform:translateY(-2px)}
+    .catbtn.active{border-color:var(--accent); box-shadow:0 0 0 2px rgba(106,165,255,.16) inset}
+    .main{padding:20px}
+    .headbar{position:sticky; top:0; z-index:5; padding:12px 0 18px; background:linear-gradient(180deg, rgba(15,18,32,.95), rgba(15,18,32,0)); backdrop-filter: blur(6px)}
+    .actions{display:flex; gap:10px; flex-wrap:wrap}
+    .section-title{margin:10px 0 12px; color:var(--muted); font-size:14px; text-transform:uppercase; letter-spacing:.12em}
+    .grid{display:grid; gap:18px}
+    .grid.projects{grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))}
+    .card{background:linear-gradient(180deg, var(--card), #0e1224); border:1px solid var(--ring); border-radius:18px; padding:16px; box-shadow: var(--shadow)}
+    .card h3{margin:.2rem 0 .4rem; font-size:18px}
+    .muted{color:var(--muted)}
+    .pill{display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:6px 10px; border-radius:999px; background:#0b0f1e; border:1px solid var(--ring)}
+    .klist{margin:.2rem 0 .2rem; padding-left:1.15rem}
+    .klist li{margin:.24rem 0}
+    .divider{height:1px; background:linear-gradient(90deg, transparent, var(--ring), transparent); margin:10px 0}
+    .footer{color:var(--muted); font-size:13px; padding:18px 0 30px}
+    .flex{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+    .sr{position:absolute; left:-9999px}
+    a {color: #e6e8f5; text-decoration: none; font-size: 17px;}
+
+    /* Responsive */
+    @media(max-width: 1100px){
+      .app{grid-template-columns: 260px 1fr}
+    }
+    @media(max-width: 900px){
+      .app{grid-template-columns: 1fr}
+      .sidebar{position:relative; height:auto; border-right:none; border-bottom:1px solid var(--ring)}
+      .brand{justify-content:center; text-align:center}
+      .controls{grid-template-columns:1fr; padding:10px}
+      .catlist{grid-template-columns: repeat(auto-fill,minmax(140px,1fr)); padding:12px}
+      .main{padding:16px}
+      .headbar{padding-bottom:10px}
+    }
+    @media(max-width: 600px){
+      .grid.projects{grid-template-columns:1fr}
+      .card{padding:12px}
+      h1{font-size:20px}
+      .brand{gap:.5rem}
+    }
+
+    /* Print */
+    @media print{
+      body{background:#fff; color:#000}
+      .app{grid-template-columns: 1fr}
+      .sidebar, .headbar, .actions{display:none!important}
+      .card{break-inside: avoid; box-shadow:none; border:1px solid #ddd; background:#fff}
+      .main{padding:0}
+      .footer{color:#555}
+      a{color:#000}
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <aside class="sidebar" aria-label="Categories">
+      <div class="brand">
+        <!-- <div class="logo" aria-hidden="true"></div> -->
+         <img class="logo" src="Logo.jpg" alt="Codrenix">
+        <div>
+          <h1>Codrenix Backend Project Collection</h1>
+          <div class="muted" style="font-size:13px">Just Take a Screenshot And Dm to order on</div>
+          <a href="https://wa.me/919552477146">Whatsapp</a>
+      -   
+          <a href="https://www.instagram.com/codrenix">Instagram</a>
+        </div>
+      </div>
+
+      <div class="controls" role="search" aria-label="Search projects">
+        <label class="sr" for="q">Search</label>
+        <div class="search">
+          <input id="q" type="search" placeholder="Search projects… (title, tech, features)" />
+        </div>
+        <div style="display:flex; gap:8px">
+          <button class="btn" id="printBtn" title="Print or save as PDF">🖨️ Print</button>
+          <button class="btn" id="showAllBtn" title="Show all projects">All</button>
+        </div>
+      </div>
+
+      <div class="section-title" style="padding:0 14px 6px">Categories</div>
+      <div class="catlist" id="catlist" aria-hidden="false"></div>
+    </aside>
+
+    <main class="main">
+      <div class="headbar">
+        <div class="actions">
+          <div class="pill" id="countpill">Loading…</div>
+          <div class="pill">Tip: Use Ctrl/Cmd+P to print current view</div>
+        </div>
+      </div>
+
+      <section id="intro" class="card" style="margin-bottom:16px">
+        <h2 style="margin:0 0 6px">Welcome</h2>
+        <p class="muted" style="margin:0">Pick a category on the left to load 50 backend project ideas. Each project is formatted with Objective, Key Features, Technology Used, and Expected Outcome. Use search to filter within the current category. Click Print to export.</p>
+      </section>
+
+      <h2 id="categoryTitle" class="section-title" style="display:none"></h2>
+      <div class="grid projects" id="projectGrid" aria-live="polite"></div>
+
+      <div class="footer">© <span id="year"></span> Backend Project Catalog. Built for fast browsing and clean printing.</div>
+    </main>
+  </div>
+
+<script>
+/* ---------------- Config ---------------- */
+const CATEGORIES = [
+  { key:'auth', name:'Authentication & Security Systems',
+    tech:['Node.js','Express','PostgreSQL','Redis','JWT','OAuth2','2FA','Rate Limiting'],
+    titles:[
+      'JWT Auth Service with Refresh Tokens','OAuth2 Provider (Authorization Code + PKCE)','Role-Based Access Control (RBAC) API','Passwordless Login with Magic Links','Multi-tenant Auth Gateway','API Key Management Server','Zero-Trust Session Manager','Device Fingerprinting & Anomaly Detection','SSO with SAML & OIDC Bridge','Audit Log & Compliance Tracker'
+    ],
+    featureSeeds:[
+      'Hashed passwords (Argon2/bcrypt) with peppering','Rotating refresh tokens and token blacklist in Redis','Per-route RBAC with policy engine','Bruteforce protection and IP throttling','Suspicious login alerts via webhook/email','Device/session management dashboard','Backup codes and TOTP-based 2FA','Admin approval & user provisioning','Comprehensive audit trails and export','Security headers and CSP hardening'
+    ]
+  },
+  { key:'commerce', name:'E-commerce & Payments',
+    tech:['Node.js','Express','MongoDB','Stripe/PayPal/Razorpay','Redis','Webhooks'],
+    titles:[
+      'Headless Cart & Checkout Service','Order Orchestrator with Sagas','Subscriptions & Billing Engine','Inventory & Stock Service','Coupon/Promo Engine','Marketplace Commission Splitter','Payouts & Settlements Service','Dispute & Refund Manager','Tax & GST Computation API','Abandoned Cart Recovery'
+    ],
+    featureSeeds:[
+      'PCI-conscious tokenization with payment gateway','Idempotent webhook handlers','Atomic cart updates with optimistic concurrency','Invoice PDF generation','Multi-currency and locale-aware pricing','Stock reservations and release timeouts','Seller payouts with T+1 settlements','GST invoice fields and HSN codes','Partial refunds and dispute workflows','Cart recovery emails & link tokens'
+    ]
+  },
+  { key:'cms', name:'Content & CMS Platforms',
+    tech:['Node.js','NestJS','PostgreSQL','Elasticsearch','CDN','S3-compatible storage'],
+    titles:[
+      'Headless CMS Core','Markdown Blog API with Drafts','Image Transform & CDN Cache','Content Approval Pipeline','WYSIWYG Collaboration Service','Localization & i18n Content Store','Scheduled Publishing & Queue','Search & Faceting Service','Changelog/Release Notes System','Content Analytics Collector'
+    ],
+    featureSeeds:[
+      'Rich text with mentions and embeds','Asset resizing and WebP generation','Role-based editorial workflow','Preview tokens & draft links','Versioning and rollback','Tagging, collections, and faceted search','CRON/queue based scheduling','CDN cache purge hooks','Editor presence and conflict resolution','Content analytics with anonymized events'
+    ]
+  },
+  { key:'social', name:'Social & Networking',
+    tech:['Node.js','Express','PostgreSQL','Redis','WebSockets','Kafka/NATS'],
+    titles:[
+      'Microblogging Service','Follow/Graph Service','Likes & Reactions API','Comments & Threads API','Media Uploads & Transcoding','Notification Fanout Service','Feed Aggregation (Home/Explore)','Hashtag & Trend Discovery','Direct Messaging with E2E','Moderation & Report Handling'
+    ],
+    featureSeeds:[
+      'Denormalized counters with background repair','Event fanout with stream processing','Rate limits per user and per route','Soft-delete, shadowban, and appeals','Graph queries with suggested follows','Signed URLs for uploads and CDN','Real-time typing/online indicators','Spam detection with heuristics','Content filters and block lists','Export user data (GDPR)'
+    ]
+  },
+  { key:'realtime', name:'Real-time & Streaming',
+    tech:['Node.js','Fastify','WebSockets','WebRTC','Redis','ClickHouse'],
+    titles:[
+      'Chat Service with Rooms','Live Presence & Status','Realtime Collaboration Cursors','Notification Delivery Gateway','Event Stream Ingest API','Server-Sent Events Broker','WebRTC Signaling Server','Live Polls & Q&A Backend','Realtime Analytics Collector','Push Subscriptions (FCM/Web Push)'
+    ],
+    featureSeeds:[
+      'Backpressure & message acking','Presence with TTL heartbeats','Room sharding & horizontal scale','Delivery guarantees (at-least-once)','Ephemeral tokens for connections','Replay from offset bookmarks','End-to-end encryption option','Typing indicators & read receipts','Latency budgets & metrics','Durable queue with retries'
+    ]
+  },
+  { key:'analytics', name:'Data Analytics & Dashboards',
+    tech:['Node.js','Python workers','PostgreSQL','ClickHouse','Airflow/Temporal','Metabase/Grafana'],
+    titles:[
+      'ETL Pipeline Orchestrator','Event Warehouse Loader','KPI Dashboard API','A/B Experiment Platform','Cohort & Retention Service','Anomaly Detection Alerts','Report Scheduling & Emailing','Geometrics & Map Tiles API','Funnel Analysis Engine','Timeseries Rollups Service'
+    ],
+    featureSeeds:[
+      'Batch + streaming ingestion','Query caching and persisted reports','Role-scoped metrics access','Experiment assignment & analysis','Segment builder with predicates','Anomaly thresholds & z-score','CSV/Excel export and emailed reports','SLA monitoring & alert routing','Drilldowns and cohort queries','Rollup tables and materialized views'
+    ]
+  },
+  { key:'health', name:'Healthcare & Medical',
+    tech:['Node.js','Express','PostgreSQL','FHIR/HL7','Redis','PDF'],
+    titles:[
+      'Patient Records (FHIR) API','Appointments & Scheduling','E-Prescription Service','Lab Reports & Results','Inventory & Pharmacy Backend','Insurance Claims Gateway','Teleconsult Notes Service','Vitals & Monitoring API','EMR Audit & Access Logs','Billing & Invoicing (Healthcare)'
+    ],
+    featureSeeds:[
+      'FHIR resources with validation','Role-based PHI access','Consent management & audit','ICD/LOINC code lookups','Prescription PDF with QR','Slot booking and reminders','Lab workflow and attachments','Inventory batches & expiries','Insurance pre-auth & claims','Data retention and HIPAA-like safeguards'
+    ]
+  },
+  { key:'finance', name:'Finance & Banking',
+    tech:['Node.js','NestJS','PostgreSQL','Kafka','Redis','gRPC'],
+    titles:[
+      'Ledger & Double-entry Engine','UPI/NEFT/IMPS Gateway Adapter','KYC & Onboarding Service','Credit Scoring Microservice','Loan Management Backend','Statements & Reconciliation','Risk & Fraud Detection','Forex Rates & Conversion','Webhook Notification Hub','Regulatory Reports Exporter'
+    ],
+    featureSeeds:[
+      'Strict idempotency keys','ACID transfers with sagas','KYC doc upload & OCR hooks','Maker-checker (4-eyes) approvals','Interest schedules and amortization','Statement PDFs & CSV exports','Rule engine for fraud patterns','FX rate caching & providers','Webhook retries with signatures','Regulatory reporting schedules'
+    ]
+  },
+  { key:'edu', name:'Education & E-learning',
+    tech:['Node.js','Express','PostgreSQL','Redis','WebSockets','S3'],
+    titles:[
+      'Course Catalog & Enrollment','Lesson/Module Content API','Quiz & Exam Engine','Proctoring Events Collector','Assignments & Submissions','Grades & Rubrics Service','Certificates Generator','Discussion Forums Backend','LMS Integrations (SCORM/xAPI)','Live Classroom Attendance'
+    ],
+    featureSeeds:[
+      'Timed quizzes with attempts','Question banks and randomization','Anti-cheat signals & flags','Submission workflows & feedback','Rubric-based grading','Certificate PDF with QR verify','Forum moderation and badges','SCORM/xAPI tracking','Enrollment rules & waitlists','Webhooks for LMS events'
+    ]
+  },
+  { key:'ai', name:'AI & ML Integrated Apps',
+    tech:['Node.js','Python','FastAPI','Vector DB','Queues','GPU workers'],
+    titles:[
+      'Document Q&A RAG Service','Image Moderation Pipeline','Speech-to-Text Job Runner','Recommendation Service','Embeddings Index API','Chat Orchestration Backend','Model Fine-tune Job Tracker','Feature Store Service','Auto-tagging & Similarity','A/B Model Router'
+    ],
+    featureSeeds:[
+      'Chunking & embedding with queues','Caching & rate limiting for models','Streaming responses over SSE','Vector search with filters','Batch jobs with retries','Content moderation thresholds','Prompt/version management','Evaluation metrics and logs','Cold/warm GPU worker pools','Fallback and circuit breaker'
+    ]
+  },
+];
+
+/* ---------- Utility to generate 50 projects per category ---------- */
+function generateProjects(cat){
+  const projects = [];
+  for(let i=1;i<=50;i++){
+    const titleSeed = cat.titles[(i-1)%cat.titles.length];
+    const title = `${i}. ${titleSeed}`;
+    const objective = `Build a backend service for ${titleSeed.toLowerCase()} within the ${cat.name.toLowerCase()} domain, focusing on reliability, security, and scalability.`;
+    // pick 5 features rotating from seeds
+    const features = Array.from({length:5}, (_,k)=> cat.featureSeeds[(i+k)%cat.featureSeeds.length]);
+    const tech = cat.tech.join(', ');
+    const outcome = `A production-ready API with clear contracts, tests, and deployment docs, suitable as a portfolio-grade project or a microservice inside a larger system.`;
+    projects.push({id:`${cat.key}-${i}`, title, objective, features, tech, outcome});
+  }
+  return projects;
+}
+
+const DATA = Object.fromEntries(CATEGORIES.map(c=>[c.key,{...c, projects: generateProjects(c)}]));
+
+/* ---------------- Renderers ---------------- */
+const catlist = document.getElementById('catlist');
+const grid = document.getElementById('projectGrid');
+const categoryTitle = document.getElementById('categoryTitle');
+const q = document.getElementById('q');
+const countpill = document.getElementById('countpill');
+const printBtn = document.getElementById('printBtn');
+const showAllBtn = document.getElementById('showAllBtn');
+
+let activeCat = CATEGORIES[0].key;
+
+function renderCategories(){
+  catlist.innerHTML = '';
+  CATEGORIES.forEach(cat=>{
+    const btn = document.createElement('button');
+    btn.className = 'catbtn' + (cat.key===activeCat?' active':'');
+    btn.setAttribute('aria-pressed', cat.key===activeCat ? 'true' : 'false');
+    btn.innerHTML = `<span class="nowrap">${cat.name}</span>`;
+    btn.onclick = ()=>{ 
+      activeCat = cat.key; 
+      document.querySelectorAll('.catbtn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active'); 
+      q.value=''; 
+      renderProjects(); 
+      window.scrollTo({top:0, behavior:'smooth'}); 
+    };
+    catlist.appendChild(btn);
+  });
+}
+
+function projectCard(p){
+  const el = document.createElement('article');
+  el.className = 'card';
+  el.innerHTML = `
+    <h3>${escapeHTML(p.title)}</h3>
+    <div class="muted">Objective:</div>
+    <p style="margin:.2rem 0 .4rem">${escapeHTML(p.objective)}</p>
+    <div class="muted">Key Features:</div>
+    <ul class="klist">${p.features.map(f=>`<li>${escapeHTML(f)}</li>`).join('')}</ul>
+    <div class="divider"></div>
+    <div class="flex" style="justify-content:space-between; align-items:flex-end">
+      <div>
+        <div class="muted">Technology Used</div>
+        <div>${escapeHTML(p.tech)}</div>
+      </div>
+      <div class="pill">ID: ${escapeHTML(p.id)}</div>
+    </div>
+    <div class="muted" style="margin-top:8px">Expected Outcome:</div>
+    <p style="margin:.2rem 0 0">${escapeHTML(p.outcome)}</p>
+  `;
+  return el;
+}
+
+function renderProjects(showAll=false){
+  const cat = DATA[activeCat];
+  categoryTitle.style.display = 'block';
+  categoryTitle.textContent = cat.name;
+  const term = q.value.trim().toLowerCase();
+  const filtered = cat.projects.filter(p=>{
+    if(!term) return true;
+    return [p.title,p.objective,p.tech,...p.features].join(' ').toLowerCase().includes(term);
+  });
+  grid.innerHTML='';
+  const listToShow = showAll ? Object.values(DATA).flatMap(c => c.projects) : filtered;
+  listToShow.forEach(p=> grid.appendChild(projectCard(p)));
+  if(showAll){
+    countpill.textContent = `${listToShow.length} projects shown (all categories)`;
+  } else {
+    countpill.textContent = `${filtered.length} / ${cat.projects.length} projects shown`;
+  }
+}
+
+/* simple HTML escape */
+function escapeHTML(s){
+  return String(s).replace(/[&<>\"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
+}
+
+/* ---------------- Events ---------------- */
+q.addEventListener('input', ()=> renderProjects());
+printBtn.addEventListener('click', ()=> window.print());
+showAllBtn.addEventListener('click', ()=> {
+  // toggle between current category and show all
+  if(showAllBtn.dataset.showing === 'all'){
+    showAllBtn.dataset.showing = '';
+    showAllBtn.textContent = 'All';
+    renderProjects(false);
+    categoryTitle.style.display = 'block';
+  } else {
+    showAllBtn.dataset.showing = 'all';
+    showAllBtn.textContent = 'Current';
+    categoryTitle.style.display = 'block';
+    renderProjects(true);
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+});
+
+/* Keyboard accessibility: focus first category button with Arrow keys */
+document.addEventListener('keydown', (e)=>{
+  const buttons = Array.from(document.querySelectorAll('.catbtn'));
+  if(!buttons.length) return;
+  const idx = buttons.findIndex(b=>b.classList.contains('active'));
+  if(e.key === 'ArrowDown' || e.key === 'ArrowRight'){
+    e.preventDefault();
+    const next = buttons[(idx+1)%buttons.length];
+    next.click();
+    next.focus();
+  } else if(e.key === 'ArrowUp' || e.key === 'ArrowLeft'){
+    e.preventDefault();
+    const prev = buttons[(idx-1+buttons.length)%buttons.length];
+    prev.click();
+    prev.focus();
+  }
+});
+
+/* ---------------- Init ---------------- */
+renderCategories();
+renderProjects();
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* Optional: Improve load performance when showing all projects on small devices:
+   If the browser slows down, you can scroll or search to limit rendering. */
+</script>
+</body>
+</html>
